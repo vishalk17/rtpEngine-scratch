@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rtpengine
+  namespace: ncloud-dev
+  labels:
+    app: rtpengine
+spec:
+  serviceName: rtpengine
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rtpengine
+  template:
+    metadata:
+      labels:
+        app: rtpengine
+    spec:
+      nodeName: kworker1-3
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      containers:
+        - name: rtpengine
+          image: ghcr.io/vishalk17/rtpengine:0.009
+          imagePullPolicy: IfNotPresent
+
+          securityContext:
+            privileged: true
+
+          env:
+            - name: PRIVATE_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+
+            - name: PUBLIC_IP
+              value: "10.50.20.35"
+
+            - name: LISTEN_PORT
+              value: "22222"
+
+            - name: HTTP_PORT
+              value: "22221"
+
+            - name: PORT_MIN
+              value: "23000"
+
+            - name: PORT_MAX
+              value: "32768"
+
+            - name: THREADS
+              value: "4"
+
+            - name: MEDIA_THREADS
+              value: "8"
+
+            - name: LOG_LEVEL
+              value: "7"
+
+          # Do NOT override command/args so ENTRYPOINT runs entrypoint.sh
+
+          ports:
+            - name: ng-udp
+              containerPort: 22222
+              protocol: UDP
+            - name: ng-tcp
+              containerPort: 22222
+              protocol: TCP
+            - name: http
+              containerPort: 22221
+              protocol: TCP
+            - name: rtp
+              containerPort: 23000
+              protocol: UDP
+
+          volumeMounts:
+            - name: recordings
+              mountPath: /rec
+      volumes:
+        - name: recordings
+          emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rtpengine
+  namespace: ncloud-dev
+  labels:
+    app: rtpengine
+spec:
+  clusterIP: None
+  selector:
+    app: rtpengine
+  ports:
+    - name: ng
+      protocol: UDP
+      port: 22222
+      targetPort: 22222
+    - name: http
+      protocol: TCP
+      port: 22221
+      targetPort: 22221
