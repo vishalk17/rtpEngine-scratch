@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 
 # Clone rtpengine
-RUN git clone --depth=1 https://github.com/sipwise/rtpengine.git /build/rtpengine
+RUN git clone --depth=1 --branch mr14.0.1.4 https://github.com/sipwise/rtpengine.git /build/rtpengine
 
 WORKDIR /build/rtpengine
 

@@ -21,7 +21,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       containers:
         - name: rtpengine
-          image: ghcr.io/vishalk17/rtpengine:0.009
+          image: ghcr.io/vishalk17/rtpengine:0.011
           imagePullPolicy: IfNotPresent
 
           securityContext:
